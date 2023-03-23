@@ -1,4 +1,4 @@
-package edu.ucalgary.oop;
+package edu.ucalgary.oop.edu.ucalgary.oop;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ public class Coyote extends CrepuscularAnimal {
     private final int CLEANING_TIME = 5;
 
     public Coyote(String name, int ID) {
-        super(name, Id, "Coyote");
+        super(name, ID, "Coyote");
     }
 
 }
