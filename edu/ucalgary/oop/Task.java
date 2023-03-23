@@ -1,4 +1,4 @@
-package edu.ucalgary.oop;
+package edu.ucalgary.oop.edu.ucalgary.oop;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class Task {
         this.windowStartHour = windowStartHour;
     }
 
-    public void setWindowStartHour(int windowEndHour) {
+    public void setWindowEndHour(int windowEndHour) {
         this.windowEndHour = windowEndHour;
     }
 
