@@ -1,13 +1,19 @@
-package edu.ucalgary.oop.edu.ucalgary.oop;
+package edu.ucalgary.oop;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Animal {
+public abstract class Animal {
     private String name;
     private int id;
     private String species;
     private ArrayList<Task> tasks;
+
+    private int feedingStart;
+    private int feedingEnd;
+
+    private int feedingTime;
+    private int feedingPrepTime;
+    private int cleaningTime;
 
     public Animal(String name, int id, String species) {
         this.name = name;
@@ -28,4 +34,20 @@ public class Animal {
         return species;
     }
 
+    public ArrayList<Task> getTasks() { return tasks; }
+
+    public void addTask(Task Treatment) {
+
+    }
+
+    public void removeTask(int index) {
+
+    }
+
+    private boolean isLitter() {
+        return true;
+    }
+
+    public abstract int getFeedTime();
+    public abstract int getPrepTime();
 }
