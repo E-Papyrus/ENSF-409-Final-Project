@@ -1,4 +1,4 @@
-package edu.ucalgary.oop.edu.ucalgary.oop;
+package edu.ucalgary.oop;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
