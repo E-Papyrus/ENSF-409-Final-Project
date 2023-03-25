@@ -10,6 +10,7 @@ public class Raccoon extends NocturnalAnimal {
 
     public Raccoon(String name, int ID) {
         super(name, ID, "Racoon");
+        this.addTask(new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24));
     }
 
     public int getFeedTime() { return this.FEEDING_TIME; }

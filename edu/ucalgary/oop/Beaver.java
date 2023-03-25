@@ -10,6 +10,7 @@ public class Beaver extends DiurnalAnimal {
 
     public Beaver(String name, int ID) {
         super(name, ID, "Beaver");
+        this.addTask(new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24));
     }
 
     public int getFeedTime() { return this.FEEDING_TIME; }

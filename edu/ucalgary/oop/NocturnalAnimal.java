@@ -9,5 +9,9 @@ public abstract class NocturnalAnimal extends Animal {
 
     public NocturnalAnimal(String name, int id, String species) {
         super(name, id, species);
+        if(this.isLitter()) {
+            return;
+        }
+        this.addTask(new Task("Feeding", this.getPrepTime(), this.getFeedTime(), FEEDING_START, FEEDING_END));
     }
 }
