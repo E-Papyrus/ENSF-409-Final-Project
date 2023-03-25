@@ -8,6 +8,13 @@ public abstract class Animal {
     private String species;
     private ArrayList<Task> tasks;
 
+    private int feedingStart;
+    private int feedingEnd;
+
+    private int feedingTime;
+    private int feedingPrepTime;
+    private int cleaningTime;
+
     public Animal(String name, int id, String species) {
         this.name = name;
         this.id = id;
@@ -31,7 +38,7 @@ public abstract class Animal {
     }
 
     public ArrayList<Task> getTasks() { return tasks; }
-
+    
     public void addTask(Task treatment) {
         tasks.add(treatment);
     }

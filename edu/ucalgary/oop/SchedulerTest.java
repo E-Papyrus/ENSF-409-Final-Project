@@ -278,7 +278,6 @@ public class SchedulerTest {
 
         assertTrue("Task constructor did not throw an IllegalArgumentException when given invalid values."
                 , correctException);
-
     }
 
     @Test
