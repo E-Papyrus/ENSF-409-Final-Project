@@ -17,6 +17,7 @@ public class Task {
         this.duration = duration;
         this.windowStartHour = windowStartHour;
         this.windowEndHour = windowEndHour;
+        validateTask();
     }
 
     public String getDescription() {
@@ -43,27 +44,45 @@ public class Task {
         return patientName;
     }
 
+    public void setPatientName(String name) {
+        this.patientName = name;
+    }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
     public void setPrepTime(int prepTime) {
         this.prepTime = prepTime;
+        validateTask();
     }
 
     public void setDuration(int duration) {
         this.duration = duration;
+        validateTask();
     }
 
-    public void setWindowStartHour(int windowStartHour) {
+    public void setWindowHours(int windowStartHour, int windowEndHour) {
         this.windowStartHour = windowStartHour;
-    }
-
-    public void setWindowEndHour(int windowEndHour) {
         this.windowEndHour = windowEndHour;
+        validateTask();
     }
 
-    private boolean validateTask() {
-        return windowEndHour - windowStartHour >= duration + prepTime;
+    private void validateTask() {
+        if(windowStartHour >= windowEndHour) {
+            throw new IllegalArgumentException("Invalid task: window ends before it begins");
+        }
+        if((windowEndHour - windowStartHour) * 60 < duration + prepTime * (windowEndHour - windowStartHour)) {
+            throw new IllegalArgumentException("Invalid task: too long for allotted window");
+        }
+        if(windowStartHour < 0 || windowStartHour > 23) {
+            throw new IllegalArgumentException("Invalid task: window starts at invalid hour");
+        }
+        if(windowEndHour < 1 || windowEndHour > 24) {
+            throw new IllegalArgumentException("Invalid task: window ends at invalid hour");
+        }
+        if(prepTime < 0 || duration <= 0) {
+            throw new IllegalArgumentException("Invalid task: negative valued prep time and/or duration");
+        }
     }
 }

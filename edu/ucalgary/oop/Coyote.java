@@ -10,6 +10,7 @@ public class Coyote extends CrepuscularAnimal {
 
     public Coyote(String name, int ID) {
         super(name, ID, "Coyote");
+        this.addTask(new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24));
     }
 
     public int getFeedTime() { return this.FEEDING_TIME; }

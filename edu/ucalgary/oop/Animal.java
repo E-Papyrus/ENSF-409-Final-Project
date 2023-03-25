@@ -8,16 +8,12 @@ public abstract class Animal {
     private String species;
     private ArrayList<Task> tasks;
 
-    private int feedingStart;
-    private int feedingEnd;
-
-    private int feedingTime;
-    private int feedingPrepTime;
-    private int cleaningTime;
-
     public Animal(String name, int id, String species) {
         this.name = name;
         this.id = id;
+        if(id <= 0) {
+            throw new IllegalArgumentException("Animal created with non-positive ID");
+        }
         this.species = species;
         tasks = new ArrayList<>();
     }
@@ -26,7 +22,7 @@ public abstract class Animal {
         return name;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 
@@ -36,16 +32,20 @@ public abstract class Animal {
 
     public ArrayList<Task> getTasks() { return tasks; }
 
-    public void addTask(Task Treatment) {
-
+    public void addTask(Task treatment) {
+        tasks.add(treatment);
     }
 
     public void removeTask(int index) {
-
+        try {
+            tasks.remove(index);
+        } catch(IndexOutOfBoundsException e) {
+            throw new IndexOutOfBoundsException("Attempted to remove a task from task-list with invalid index");
+        }
     }
 
-    private boolean isLitter() {
-        return true;
+    boolean isLitter() {
+        return this.name.contains(" and ");
     }
 
     public abstract int getFeedTime();

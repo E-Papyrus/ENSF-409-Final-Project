@@ -9,7 +9,9 @@ public class Fox extends NocturnalAnimal {
     public static final int CLEANING_TIME = 5;
 
     public Fox(String name, int ID) {
-        super(name, ID, "Fox");
+
+        super(name, ID, "fox");
+        this.addTask(new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24));
     }
 
     public int getFeedTime() { return this.FEEDING_TIME; }
