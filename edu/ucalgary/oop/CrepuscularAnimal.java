@@ -1,17 +1,39 @@
+/**
+ @author Mariyah Malik
+ @author Ethan Reed
+ <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
+ @version 0.3
+ @since 0.1
+ */
+
 package edu.ucalgary.oop;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-
+/*
+CrepuscularAnimal is an abstract subclass of the abstract class Animal.
+The class is intended to be extended by a number of concrete subclasses that
+implement the abstract getter methods declared in Animal. Objects of this class
+will contain a feeding Task if they are representative of an individual animal.
+The feeding Task is created using default values from this class, as well as
+values retrieved from its concrete subclass.
+*/
 public abstract class CrepuscularAnimal extends Animal {
+    // Default class values used in the creation of feeding Task objects:
     public static final int FEEDING_START = 19;
     public static final int FEEDING_END = 22;
 
+    // Constructor:
+    // Uses logic from the superclass to determine if the object is
+    // representative of an individual or a litter. If it's an individual,
+    // a feeding Task is created and added. Litters have custom feeding Tasks
+    // defined in the database, so no default feeding Task is added during the
+    // creation of the object.
     public CrepuscularAnimal(String name, int id, String species) {
         super(name, id, species);
         if(this.isLitter()) {
           return;
         }
-        this.addTask(new Task("Feeding", this.getPrepTime(), this.getFeedTime(), FEEDING_START, FEEDING_END));
+        Task feeding = new Task("Feeding", this.getPrepTime(), this.getFeedTime(), FEEDING_START, FEEDING_END);
+        feeding.setPatient(this);
+        this.addTask(feeding);
     }
 }

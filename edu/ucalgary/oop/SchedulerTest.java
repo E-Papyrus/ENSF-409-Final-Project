@@ -1,3 +1,11 @@
+/**
+ @author Mariyah Malik
+ @author Ethan Reed
+ <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
+ @version 0.3
+ @since 0.1
+ */
+
 package edu.ucalgary.oop;
 
 import org.junit.Test;
