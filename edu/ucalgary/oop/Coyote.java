@@ -26,7 +26,7 @@ public class Coyote extends CrepuscularAnimal {
     // creates and adds the default cleaning Task.
     public Coyote(String name, int ID) {
         super(name, ID, "Coyote");
-        Task cleaning = new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24);
+        Task cleaning = new Task("Coyote cage cleaning", 0, CLEANING_TIME, 0, 24);
         cleaning.setPatient(this);
         this.addTask(cleaning);
     }

@@ -32,7 +32,7 @@ public abstract class CrepuscularAnimal extends Animal {
         if(this.isLitter()) {
           return;
         }
-        Task feeding = new Task("Feeding", this.getPrepTime(), this.getFeedTime(), FEEDING_START, FEEDING_END);
+        Task feeding = new Task(species + " feeding", this.getPrepTime(), this.getFeedTime(), FEEDING_START, FEEDING_END);
         feeding.setPatient(this);
         this.addTask(feeding);
     }

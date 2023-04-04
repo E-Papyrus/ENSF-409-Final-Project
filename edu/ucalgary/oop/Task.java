@@ -8,9 +8,6 @@
 
 package edu.ucalgary.oop;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-
 /*
 Class to contain any relevant information about the tasks to be scheduled a
 EWR. Contains logic to validate the state of any created objects.
@@ -22,6 +19,8 @@ public class Task {
     private int duration;
     private int windowStartHour;
     private int windowEndHour;
+
+    private boolean scheduled = false;
 
     // Constructor:
     public Task(String description, int prepTime, int duration, int windowStartHour, int windowEndHour) {
@@ -50,6 +49,7 @@ public class Task {
     public int getWindowEndHour() {
         return windowEndHour;
     }
+    public int getWindowLength() { return windowEndHour - windowStartHour; }
     public Animal getPatient() {
         return patient;
     }
@@ -81,6 +81,16 @@ public class Task {
         validateTask();
     }
 
+    // Return true if Task has been scheduled.
+    public boolean isScheduled() {
+        return scheduled;
+    }
+
+    // Sets scheduled.
+    public void setScheduled(boolean scheduled) {
+        this.scheduled = scheduled;
+    }
+
     // A series of checks on the data members of a Task object. Throws an
     // IllegalArgumentException if the Task is in an invalid state.
     private void validateTask() {
@@ -91,10 +101,12 @@ public class Task {
             throw new IllegalArgumentException("Invalid task: too long for allotted window");
         }
         if(windowStartHour < 0 || windowStartHour > 23) {
-            throw new IllegalArgumentException("Invalid task: window starts at invalid hour");
+            throw new IllegalArgumentException(
+                    "Invalid task: window starts at invalid hour (" + windowStartHour + ")");
         }
         if(windowEndHour < 1 || windowEndHour > 24) {
-            throw new IllegalArgumentException("Invalid task: window ends at invalid hour");
+            throw new IllegalArgumentException(
+                    "Invalid task: window ends at invalid hour (" + windowEndHour + ")");
         }
         if(prepTime < 0 || duration <= 0) {
             throw new IllegalArgumentException("Invalid task: negative valued prep time and/or duration");
