@@ -26,7 +26,7 @@ public class Fox extends NocturnalAnimal {
     // creates and adds the default cleaning Task.
     public Fox(String name, int ID) {
         super(name, ID, "fox");
-        Task cleaning = new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24);
+        Task cleaning = new Task("Fox cage cleaning", 0, CLEANING_TIME, 0, 24);
         cleaning.setPatient(this);
         this.addTask(cleaning);
     }

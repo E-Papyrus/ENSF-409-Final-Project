@@ -26,7 +26,7 @@ public class Raccoon extends NocturnalAnimal {
     // creates and adds the default cleaning Task.
     public Raccoon(String name, int ID) {
         super(name, ID, "Racoon");
-        Task cleaning = new Task("Cage cleaning", 0, CLEANING_TIME, 0, 24);
+        Task cleaning = new Task("Raccoon cage cleaning", 0, CLEANING_TIME, 0, 24);
         cleaning.setPatient(this);
         this.addTask(cleaning);
     }
