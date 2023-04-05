@@ -9,6 +9,10 @@ DROP DATABASE IF EXISTS EWR;
 CREATE DATABASE EWR; 
 USE EWR;
 
+DROP USER IF EXISTS 'oop'@'localhost';
+CREATE USER 'oop'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL ON EWR.* TO 'oop'@'localhost';
+
 DROP TABLE IF EXISTS ANIMALS;
 CREATE TABLE ANIMALS (
 	AnimalID		int not null AUTO_INCREMENT,
@@ -32,7 +36,8 @@ INSERT INTO ANIMALS (AnimalID, AnimalNickname, AnimalSpecies) VALUES
 (12, 'Shadow', 'porcupine'),
 (13, 'Boots', 'coyote'),
 (14, 'Spin', 'coyote'),
-(15, 'Spot', 'coyote');
+(15, 'Spot', 'coyote'),
+(16, 'Busy', 'beaver');
 
 DROP TABLE IF EXISTS TASKS;
 CREATE TABLE TASKS (
@@ -53,7 +58,8 @@ INSERT INTO TASKS (TaskID, Description, Duration, MaxWindow) VALUES
 (7, 'Give vitamin injection', 5, 5),
 (8, 'Mange treatment', 15, 4),
 (9, 'Eyedrops', 25, 1),
-(10, 'Inspect broken leg', 5, 2);
+(10, 'Inspect broken leg', 5, 2),
+(11, 'File teeth', 30, 6);
 
 DROP TABLE IF EXISTS TREATMENTS;
 CREATE TABLE TREATMENTS (
@@ -93,4 +99,6 @@ INSERT INTO TREATMENTS (AnimalID, TaskID, StartHour) VALUES
 (13, 6, 22),
 (14, 10, 13),
 (14, 8, 13),
+(16, 11, 0),
+(16, 11, 22),
 (15, 8, 13);
