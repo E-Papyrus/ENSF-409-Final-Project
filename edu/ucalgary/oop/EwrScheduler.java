@@ -8,6 +8,9 @@
 
 package edu.ucalgary.oop;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -19,7 +22,7 @@ Also contains an array of 24 lists which hold the Tasks scheduled for each hour,
 the final schedule is built by gradually adding tasks to these lists. Tasks with
 smaller windows are added first, as they are less flexible.
 */
-public class Scheduler {
+public class EwrScheduler {
     private HashMap<Integer, Animal> patientMap; // Map of patients used in task building
     private ArrayList<Task> taskList; // Holds tasks not yet assigned to hours
     private ArrayList<Task>[] hourlyTasks; // Potential hourly schedules
@@ -28,38 +31,40 @@ public class Scheduler {
     private boolean[] lockedHours; // Stores locked status of hours
     private int[] hourlyMaxTime; // Stores total duration of tasks in hourly task lists
     private int[] hourlyScheduledTime; // Stores total duration of tasks in hourly locked task lists
-    private LocalDate date; // date schedule is being made for
+    private LocalDate date; // Date the schedule is being made for
+    private boolean backupScheduled = false; // Set if backup is scheduled
+    private int backupHour = 24; // Hour in which backup is scheduled
 
     // Credentials for super secure database:
     private Connection dbConnect;
     public final static String DBURL = "jdbc:mysql://localhost:3306/ewr";
-    public final static String USERNAME = "student";
-    public final static String PASSWORD = "ensf";
+    public final static String USERNAME = "oop";
+    public final static String PASSWORD = "password";
 
     // Constructor:
-    public Scheduler(LocalDate date) {
+    public EwrScheduler(LocalDate date) {
         this.date = date;
         // Initialize Lists and Maps:
         patientMap = new HashMap<>();
         taskList = new ArrayList<>();
-        hourlyTasks = new ArrayList[24];
-        for (int i = 0; i < 24; i++) {
+        hourlyTasks = new ArrayList[25];
+        for (int i = 0; i < 25; i++) {
             hourlyTasks[i] = new ArrayList<>();
         }
-        hourlyFeedingTasks = new HashMap[24];
-        for (int i = 0; i < 24; i++) {
+        hourlyFeedingTasks = new HashMap[25];
+        for (int i = 0; i < 25; i++) {
             hourlyFeedingTasks[i] = new HashMap<>();
         }
-        hourlyTasksLocked = new ArrayList[24];
-        for (int i = 0; i < 24; i++) {
+        hourlyTasksLocked = new ArrayList[25];
+        for (int i = 0; i < 25; i++) {
             hourlyTasksLocked[i] = new ArrayList<>();
         }
         // Initialize arrays:
-        hourlyMaxTime = new int[24];
+        hourlyMaxTime = new int[25];
         Arrays.fill(hourlyMaxTime, 0);
-        hourlyScheduledTime = new int[24];
+        hourlyScheduledTime = new int[25];
         Arrays.fill(hourlyScheduledTime, 0);
-        lockedHours = new boolean[24];
+        lockedHours = new boolean[25];
         Arrays.fill(lockedHours, false);
     }
 
@@ -75,13 +80,14 @@ public class Scheduler {
 
         boolean hoursUpdated; // Flag set if changes are made during a cycle
         int i;
+        int hoursInDay = 24;
 
         while(true) {
             hoursUpdated = false; // Reset flag for new cycle
             countDurations(); // Reset hourly total durations for new cycle
 
             // Lock in any hours with 60 minutes or less assigned to them
-            for (i = 0; i < 24; i++) {
+            for (i = 0; i < hoursInDay; i++) {
                 if (lockedHours[i]) continue;
                 if (hourlyMaxTime[i] <= 60) {
                     hoursUpdated = true; // Changes made, so flag set
@@ -91,20 +97,25 @@ public class Scheduler {
             if (hoursUpdated) continue; // Recount and go through hours again
 
             // Force an open hour to take some tasks if none were easily assigned
-            for (i = 0; i < 24; i++) {
+            for (i = 0; i < hoursInDay; i++) {
                 if (!lockedHours[i]) {
                     lockHourIn(i);
                     break;
                 }
             }
-            // If all hours are locked, add next task group or overfill an hour
-            if (i == 24) {
-                // TODO: if i == 24 (find where to get backup)
+            // If all hours are locked, the group is either done or overbooked
+            if (i == hoursInDay) {
+                // If the hour lists still have task remaining, schedule backup
+                if(scheduleBackup()) {
+                    hoursInDay = 25; // More hours to loop through with backup
+                    continue;
+                }
+                // This group is done, finish sorting if no more groups are left
                 if (taskList.isEmpty()) break;
+                // Or add the next group
                 addNextLayer();
             }
         }
-        printSchedule();
     }
 
     // Adds the next group of tasks from the main task list to the hour's lists.
@@ -126,8 +137,17 @@ public class Scheduler {
             if(task.getWindowLength() > shortestWindow) continue;
             for(i = task.getWindowStartHour(); i < task.getWindowEndHour(); i++) {
                 hourlyTasks[i].add(task);
-                // Unlock any hours with an updated task list
-                lockedHours[i] = false;
+                // Unlock any hours with an updated task list and free time
+                if(hourlyScheduledTime[i] < 60) {
+                    lockedHours[i] = false;
+                }
+                // Add task to back up list if backupHour is within its window
+                if(backupHour != i) continue;
+                hourlyTasks[24].add(task);
+                // Unlock back up list if it isn't full
+                if(hourlyScheduledTime[24] < 60) {
+                    lockedHours[24] = false;
+                }
             }
             // Remove tasks added to hourly list from taskList
             iter.remove();
@@ -178,11 +198,18 @@ public class Scheduler {
 
     // Adds the durations of each task that can be slotted into each hour,
     // and stores them in hourlyMaxTime.
-    private void countDurations() { // TODO: Change to consider prep
+    private void countDurations() {
         ArrayList<Task> hour;
-        for(int i = 0; i < 24; i++) {
+        int hoursInDay = 24;
+        if(backupScheduled) hoursInDay = 25;
+        for(int i = 0; i < hoursInDay; i++) {
             hour = hourlyTasks[i];
             hourlyMaxTime[i] = hourlyScheduledTime[i];
+            // Remove key-value pairs of unscheduled feeding tasks
+            for(String feedingKey : hourlyFeedingTasks[i].keySet()) {
+                if(hourlyFeedingTasks[i].get(feedingKey)) continue;
+                hourlyFeedingTasks[i].remove(feedingKey);
+            }
             for(Task task : hour) {
                 if(task.getPrepTime() > 0) {
                     if(!hourlyFeedingTasks[i].containsKey(task.getDescription())) {
@@ -197,17 +224,88 @@ public class Scheduler {
         }
     }
 
-    // Creates a text file containing the finalized schedule for the day.
-    public void printSchedule() { // TODO: temporarily prints to command line
-        System.out.println("Schedule for " + date.toString() + "\n");
-        ArrayList<Task> hour;
+    // return false if nothing is scheduled
+    private boolean scheduleBackup() {
+        int busiestHour = -1;
+        int extraMinutes;
+        int mostMinutes = 0;
+        ArrayList<Task> hourList;
+        // Look through hourly lists and find hour with the largest duration of unscheduled tasks
         for(int i = 0; i < 24; i++) {
-            hour = hourlyTasksLocked[i];
-            System.out.println("\t" + i + ":00");
-            for(Task task : hour) {
-                System.out.println("\t- " + task.getDescription() + " (" + task.getPatient().getName() + ")");
+            hourList = hourlyTasks[i];
+            extraMinutes = 0;
+            for(Task task : hourList) {
+                if(task.isScheduled()) continue;
+                extraMinutes += task.getDuration();
             }
-            System.out.println();
+            if(extraMinutes <= mostMinutes) continue;
+            busiestHour = i;
+            mostMinutes = extraMinutes;
+        }
+        // Return false if no hours have additional tasks
+        if(busiestHour == -1) return false;
+
+        if(backupScheduled) {
+            // Backup can only be scheduled once
+            throw new IllegalStateException("Cannot fit all tasks");
+        }
+        backupScheduled = true; // Set flag if not already set
+
+        //
+        backupHour = busiestHour;
+        hourlyTasks[24].addAll(hourlyTasks[busiestHour]);
+
+        return true;
+    }
+
+    // Creates a text file containing the finalized schedule for the day.
+    public void printSchedule() {
+        String fileName = "ewrSchedule_" + date.toString() + ".txt";
+        String line;
+        BufferedWriter textFileOut = null;
+        try {
+            textFileOut = new BufferedWriter(new FileWriter(fileName));
+        } catch(IOException e) {
+            System.out.println("Unable to open or create file 'schedule.txt'"); // TODO: exception handling
+        }
+
+        try {
+            textFileOut.write(
+                    "|--------------------------------------------------------------|\n" +
+                    "|            Example Wildlife Rescue Daily Schedule            |\n" +
+                    "|--------------------------------------------------------------|\n");
+            line = String.format("| Date: %-55s|\n", date.toString());
+            textFileOut.write(line);
+
+            ArrayList<Task> hour;
+            for (int i = 0; i < 24; i++) {
+                hour = hourlyTasksLocked[i];
+                line = String.format("|%63s\n|   %02d:00", "|", i);
+                if(backupHour == i) {
+                    line += " [Backup volunteer scheduled] <------------------ !   |\n";
+                    hour.addAll(hourlyTasksLocked[24]);
+                } else {
+                    line += "                                                      |\n";
+                }
+                textFileOut.write(line);
+                if(hour.isEmpty()) {
+                    line = String.format("|   - %-57s|\n",
+                            "Nothing scheduled for hour");
+                    textFileOut.write(line);
+                }
+                for (Task task : hour) {
+                    line = String.format("|   - %-57s|\n",
+                            task.getDescription() +
+                            " (" + task.getPatient().getName() + ")");
+                    textFileOut.write(line);
+                }
+            }
+            textFileOut.write(
+                    "|                                                              |\n" +
+                    "|--------------------------------------------------------------|");
+            textFileOut.close();
+        } catch(IOException e) {
+            System.out.println("Issues writing to file 'schedule.txt'"); // TODO
         }
     }
 
@@ -342,15 +440,14 @@ public class Scheduler {
         }
     }
 
+    // Attempts to disconnect from database
     private void disconnectFromDatabase() {
         try { if (dbConnect != null) dbConnect.close(); } catch (SQLException e) {e.printStackTrace();}  // TODO: proper error handling
     }
 
-    // If any hour in the day has a negative amount of unscheduled time, returns
-    // true. This shows that a backup volunteer needs to be scheduled for that
-    // hour.
-    private boolean backupRequired() {
-        return false;
+    // Returns value of backupScheduled flag
+    private boolean isBackupScheduled() {
+        return backupScheduled;
     }
 
     public LocalDate getDate() { return this.date; }

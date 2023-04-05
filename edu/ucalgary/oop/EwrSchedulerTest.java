@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class SchedulerTest {
+public class EwrSchedulerTest {
 
     private Task testTaskGood = new Task("testTask", 10, 20, 0, 3);
     private ArrayList<Task> testTasksGoodData = new ArrayList<>(List.of(new Task[]{
@@ -23,7 +23,7 @@ public class SchedulerTest {
             new Task("Tasktest", 0, 60, 10, 23)}));
     private Porcupine testAnimal = new Porcupine("Spike", 2);
 
-    public SchedulerTest() { testAnimal.addTask(testTaskGood); }
+    public EwrSchedulerTest() { testAnimal.addTask(testTaskGood); }
 
     @Test
     public void testFoxConstructor() {
