@@ -2,7 +2,7 @@
  @author Mariyah Malik
  @author Ethan Reed
  <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
- @version 0.3
+ @version 0.9
  @since 0.1
  */
 
@@ -32,6 +32,6 @@ public class Beaver extends DiurnalAnimal {
     }
 
     // Getters used by the superclass to create a feeding Task
-    public int getFeedTime() { return this.FEEDING_TIME; }
-    public int getPrepTime() { return this.FEEDING_PREP_TIME; }
+    public int getFeedTime() { return FEEDING_TIME; }
+    public int getPrepTime() { return FEEDING_PREP_TIME; }
 }

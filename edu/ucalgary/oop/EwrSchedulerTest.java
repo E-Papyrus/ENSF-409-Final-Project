@@ -2,7 +2,7 @@
  @author Mariyah Malik
  @author Ethan Reed
  <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
- @version 0.3
+ @version 0.9
  @since 0.1
  */
 
@@ -20,7 +20,7 @@ public class EwrSchedulerTest {
     private Task testTaskGood = new Task("testTask", 10, 20, 0, 3);
     private ArrayList<Task> testTasksGoodData = new ArrayList<>(List.of(new Task[]{
             testTaskGood,
-            new Task("Tasktest", 0, 60, 10, 23)}));
+            new Task("taskTest", 0, 60, 10, 23)}));
     private Porcupine testAnimal = new Porcupine("Spike", 2);
 
     public EwrSchedulerTest() { testAnimal.addTask(testTaskGood); }
@@ -63,13 +63,13 @@ public class EwrSchedulerTest {
             Fox fox = new Fox("Tod1", 0);
         } catch(IllegalArgumentException e) {
             correctExceptionZero = true;
-        } catch(Exception e) {}
+        } catch(Exception ignored) {}
 
         try {
             Beaver beaver = new Beaver("Tod2", -1);
         } catch(IllegalArgumentException e) {
             correctExceptionNegative = true;
-        } catch(Exception e) {}
+        } catch(Exception ignored) {}
         assertTrue("Animal constructor did not throw an IllegalArgumentException when given zero valued id.",
                 correctExceptionZero);
         assertTrue("Animal constructor did not throw an IllegalArgumentException when given negative valued id.",
@@ -244,7 +244,7 @@ public class EwrSchedulerTest {
         Task task = null;
         try {
             task = new Task("Give the dog a bone", 10, 20, 10, 13);
-        } catch(Exception e) { }
+        } catch(Exception ignored) { }
 
         assertNotNull("Task constructor did not create an object when given valid data.", task);
     }
@@ -256,7 +256,7 @@ public class EwrSchedulerTest {
             Task task = new Task("Give the dog a bone", 10, 500, 10, 13);
         } catch(IllegalArgumentException e) {
             correctException = true;
-        } catch(Exception e) { }
+        } catch(Exception ignored) { }
 
         assertTrue("Task constructor did not throw an IllegalArgumentException when given too long of a duration."
                 , correctException);
@@ -269,7 +269,7 @@ public class EwrSchedulerTest {
             Task task = new Task("Give dog", 10, 20, 12, 5);
         } catch(IllegalArgumentException e) {
             correctException = true;
-        } catch(Exception e) { }
+        } catch(Exception ignored) { }
 
         assertTrue("Task constructor did not throw an IllegalArgumentException when given an invalid window."
                 , correctException);
@@ -282,7 +282,7 @@ public class EwrSchedulerTest {
             Task task = new Task("Give dog", -1, 0, -1, 25);
         } catch(IllegalArgumentException e) {
             correctException = true;
-        } catch(Exception e) { }
+        } catch(Exception ignored) { }
 
         assertTrue("Task constructor did not throw an IllegalArgumentException when given invalid values."
                 , correctException);
@@ -309,7 +309,7 @@ public class EwrSchedulerTest {
             raccoon.removeTask(1);
         } catch(IndexOutOfBoundsException e) {
             correctException = true;
-        } catch(Exception e) { }
+        } catch(Exception ignored) { }
 
         assertTrue("Method removeTask did not throw an IndexOutOfBoundsException when given an invalid index",
                 correctException);
