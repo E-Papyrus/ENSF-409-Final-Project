@@ -18,7 +18,7 @@ public class DiurnalAnimalTest {
         assertTrue(animal.getFeedTime() >= 0);
 
         // Test feeding task creation
-        if (!animla.isLitter()) {
+        if (!animal.isLitter()) {
             assertEquals(1, animal.getTasks().size());
 
             Task task = animal.getTasks().get(0);
