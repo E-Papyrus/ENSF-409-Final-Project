@@ -22,6 +22,7 @@ Also contains an array of 24 lists which hold the Tasks scheduled for each hour,
 the final schedule is built by gradually adding tasks to these lists. Tasks with
 smaller windows are added first, as they are less flexible.
 */
+@SuppressWarnings("unchecked")
 public class EwrScheduler {
     private HashMap<Integer, Animal> patientMap; // Map of patients used in task building
     private ArrayList<Task> taskList; // Holds tasks not yet assigned to hours
@@ -31,19 +32,26 @@ public class EwrScheduler {
     private boolean[] lockedHours; // Stores locked status of hours
     private int[] hourlyMaxTime; // Stores total duration of tasks in hourly task lists
     private int[] hourlyScheduledTime; // Stores total duration of tasks in hourly locked task lists
-    private LocalDate date; // Date the schedule is being made for
+    private final LocalDate DATE; // Date the schedule is being made for
     private boolean backupScheduled = false; // Set if backup is scheduled
     private int backupHour = 24; // Hour in which backup is scheduled
 
     // Credentials for super secure database:
     private Connection dbConnect;
-    public final static String DBURL = "jdbc:mysql://localhost:3306/ewr";
-    public final static String USERNAME = "oop";
-    public final static String PASSWORD = "password";
+    public final static String DB_URL = "jdbc:mysql://localhost:3306/ewr";
+    private final String USERNAME;
+    public final String PASSWORD;
 
     // Constructor:
-    public EwrScheduler(LocalDate date) {
-        this.date = date;
+    public EwrScheduler(LocalDate date, String username, String password) {
+        this.DATE = date;
+        this.PASSWORD = password;
+        this.USERNAME = username;
+    }
+
+    // Resets/initializes all list, maps, and arrays.
+    // Resets all data members.
+    private void initialize() {
         // Initialize Lists and Maps:
         patientMap = new HashMap<>();
         taskList = new ArrayList<>();
@@ -66,15 +74,21 @@ public class EwrScheduler {
         Arrays.fill(hourlyScheduledTime, 0);
         lockedHours = new boolean[25];
         Arrays.fill(lockedHours, false);
+
+        // Reset all other data members/flags
+        backupScheduled = false;
+        backupHour = 24;
     }
 
     // Builds the schedule one group of tasks at time, where tasks are grouped
     // by the length of their windows. Starts with the smallest windows length,
     // and moves up a length when the schedule is solved for the current group.
-    public void buildSchedule() {
-        // Populate lists
+    public boolean buildSchedule() throws IllegalStateException{
+        // Reset data members and populate lists
+        initialize();
         buildPatientMap();
         buildTaskLists();
+
         // Move first layer of tasks into hourly lists
         addNextLayer();
 
@@ -116,6 +130,7 @@ public class EwrScheduler {
                 addNextLayer();
             }
         }
+        return backupScheduled;
     }
 
     // Adds the next group of tasks from the main task list to the hour's lists.
@@ -152,6 +167,66 @@ public class EwrScheduler {
             // Remove tasks added to hourly list from taskList
             iter.remove();
         }
+    }
+
+    public ArrayList<Task> getExcessiveList() {
+        ArrayList<Integer> problemHours = new ArrayList<>();
+        for(int i = 0; i < 24; i++) {
+            if(!hourlyTasks[i].isEmpty()) {
+                problemHours.add(i);
+            }
+        }
+
+        ArrayList<Task> excessiveTasks = new ArrayList<>();
+        for(Integer hour : problemHours) {
+            for(Task task : hourlyTasks[hour]) {
+                if(excessiveTasks.contains(task) || task.getTreatmentID() == -1) continue;
+                excessiveTasks.add(task);
+            }
+            for(Task task : hourlyTasksLocked[hour]) {
+                if(excessiveTasks.contains(task) || task.getTreatmentID() == -1) continue;
+                excessiveTasks.add(task);
+            }
+        }
+
+        return excessiveTasks;
+    }
+
+    public int[] getHourlyScheduledTime() {
+        int[] copy = Arrays.copyOf(hourlyScheduledTime, 24);
+        if(backupHour >= 0 && backupHour < 24) copy[backupHour] += hourlyScheduledTime[24];
+        return copy;
+    }
+
+    public void removeFromDB(int treatmentID) {
+        connectToDataBase();
+
+        try {
+            String deleteQuery = String.format("DELETE FROM TREATMENTS WHERE TreatmentID=%d", treatmentID);
+            PreparedStatement deleteStatement = dbConnect.prepareStatement(deleteQuery);
+            deleteStatement.executeUpdate();
+        } catch(SQLException e) {
+            // TODO
+            e.printStackTrace();
+            System.exit(0);
+        }
+
+        disconnectFromDatabase();
+    }
+
+    public void editTreatmentDB(int treatmentID, int newStartHour) {
+        connectToDataBase();
+
+        try {
+            String updateQuery = String.format("UPDATE TREATMENTS SET StartHour=%d WHERE TreatmentID=%d",newStartHour, treatmentID);
+            PreparedStatement updateStatement = dbConnect.prepareStatement(updateQuery);
+            updateStatement.executeUpdate();
+        } catch(SQLException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+
+        disconnectFromDatabase();
     }
 
     // Takes an integer hour as an argument, and schedules tasks to that hour's
@@ -230,7 +305,8 @@ public class EwrScheduler {
         int extraMinutes;
         int mostMinutes = 0;
         ArrayList<Task> hourList;
-        // Look through hourly lists and find hour with the largest duration of unscheduled tasks
+        // Look through hourly lists and find hour with the largest duration of
+        // unscheduled tasks
         for(int i = 0; i < 24; i++) {
             hourList = hourlyTasks[i];
             extraMinutes = 0;
@@ -251,22 +327,23 @@ public class EwrScheduler {
         }
         backupScheduled = true; // Set flag if not already set
 
-        //
+        // Assign back-up volunteer to decided hour
         backupHour = busiestHour;
+        // Populate back-up hourly task list with list from decided hour
         hourlyTasks[24].addAll(hourlyTasks[busiestHour]);
-
         return true;
     }
 
     // Creates a text file containing the finalized schedule for the day.
     public void printSchedule() {
-        String fileName = "ewrSchedule_" + date.toString() + ".txt";
+        String fileName = "ewrSchedule_" + DATE.toString() + ".txt";
         String line;
         BufferedWriter textFileOut = null;
         try {
             textFileOut = new BufferedWriter(new FileWriter(fileName));
         } catch(IOException e) {
-            System.out.println("Unable to open or create file 'schedule.txt'"); // TODO: exception handling
+            System.out.println("Unable to open or create file 'schedule.txt'");
+            System.exit(1); // TODO: exception handling
         }
 
         try {
@@ -274,7 +351,7 @@ public class EwrScheduler {
                     "|--------------------------------------------------------------|\n" +
                     "|            Example Wildlife Rescue Daily Schedule            |\n" +
                     "|--------------------------------------------------------------|\n");
-            line = String.format("| Date: %-55s|\n", date.toString());
+            line = String.format("| Date: %-55s|\n", DATE);
             textFileOut.write(line);
 
             ArrayList<Task> hour;
@@ -348,6 +425,7 @@ public class EwrScheduler {
                 taskRow.next();
                 // Create new Task from row in TASKS
                 newTask = new Task(
+                        treatments.getInt("TreatmentID"),
                         taskRow.getString("Description"),
                         0,
                         taskRow.getInt("Duration"),
@@ -434,7 +512,7 @@ public class EwrScheduler {
     // Attempts to connect to the database.
     private void connectToDataBase() {
         try{
-            dbConnect = DriverManager.getConnection(DBURL, USERNAME, PASSWORD);
+            dbConnect = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             e.printStackTrace();  // TODO: proper error handling
         }
@@ -445,10 +523,15 @@ public class EwrScheduler {
         try { if (dbConnect != null) dbConnect.close(); } catch (SQLException e) {e.printStackTrace();}  // TODO: proper error handling
     }
 
+    public void testDbConnection() throws SQLException {
+            dbConnect = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            dbConnect.close();
+    }
+
     // Returns value of backupScheduled flag
     private boolean isBackupScheduled() {
         return backupScheduled;
     }
 
-    public LocalDate getDate() { return this.date; }
+    public LocalDate getDate() { return this.DATE; }
 }
