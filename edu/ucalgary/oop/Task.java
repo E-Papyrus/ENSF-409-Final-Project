@@ -9,10 +9,11 @@
 package edu.ucalgary.oop;
 
 /*
-Class to contain any relevant information about the tasks to be scheduled a
+Class to contain any relevant information about the tasks to be scheduled at
 EWR. Contains logic to validate the state of any created objects.
 */
 public class Task {
+    private int treatmentID = -1;
     private String description;
     private Animal patient;
     private int prepTime;
@@ -33,7 +34,13 @@ public class Task {
         validateTask();
     }
 
+    public Task(int treatmentID, String description, int prepTime, int duration, int windowStartHour, int windowEndHour) {
+        this(description, prepTime, duration, windowStartHour, windowEndHour);
+        this.treatmentID = treatmentID;
+    }
+
     // Getters and Setters:
+    public int getTreatmentID() { return treatmentID; }
     public String getDescription() {
         return description;
     }
@@ -100,11 +107,11 @@ public class Task {
         if((windowEndHour - windowStartHour) * 60 < duration + prepTime * (windowEndHour - windowStartHour)) {
             throw new IllegalArgumentException("Invalid task: too long for allotted window");
         }
-        if(windowStartHour < 0 || windowStartHour > 23) {
+        if(windowStartHour < 0) {
             throw new IllegalArgumentException(
                     "Invalid task: window starts at invalid hour (" + windowStartHour + ")");
         }
-        if(windowEndHour < 1 || windowEndHour > 24) {
+        if(windowEndHour > 24) {
             throw new IllegalArgumentException(
                     "Invalid task: window ends at invalid hour (" + windowEndHour + ")");
         }
