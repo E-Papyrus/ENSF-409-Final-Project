@@ -2,7 +2,7 @@
  @author Mariyah Malik
  @author Ethan Reed
  <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
- @version 0.3
+ @version 0.8
  @since 0.1
  */
 
@@ -83,7 +83,7 @@ public class EwrScheduler {
     // Builds the schedule one group of tasks at time, where tasks are grouped
     // by the length of their windows. Starts with the smallest windows length,
     // and moves up a length when the schedule is solved for the current group.
-    public boolean buildSchedule() throws IllegalStateException{
+    public boolean buildSchedule() throws IllegalStateException, SQLException, IllegalArgumentException {
         // Reset data members and populate lists
         initialize();
         buildPatientMap();
@@ -171,7 +171,11 @@ public class EwrScheduler {
 
     public ArrayList<Task> getExcessiveList() {
         ArrayList<Integer> problemHours = new ArrayList<>();
+        problemHours.add(24);
+        problemHours.add(backupHour);
         for(int i = 0; i < 24; i++) {
+            if(i == backupHour) continue;
+            lockHourIn(i);
             if(!hourlyTasks[i].isEmpty()) {
                 problemHours.add(i);
             }
@@ -198,33 +202,28 @@ public class EwrScheduler {
         return copy;
     }
 
-    public void removeFromDB(int treatmentID) {
+    public ArrayList<Task>[] getSchedule() {
+        ArrayList<Task>[] copySchedule = Arrays.copyOf(hourlyTasksLocked, 24);
+        if(backupHour >= 0 && backupHour < 24) copySchedule[backupHour].addAll(hourlyTasksLocked[24]);
+        return copySchedule;
+    }
+
+    public void removeFromDB(int treatmentID) throws SQLException{
         connectToDataBase();
 
-        try {
-            String deleteQuery = String.format("DELETE FROM TREATMENTS WHERE TreatmentID=%d", treatmentID);
-            PreparedStatement deleteStatement = dbConnect.prepareStatement(deleteQuery);
-            deleteStatement.executeUpdate();
-        } catch(SQLException e) {
-            // TODO
-            e.printStackTrace();
-            System.exit(0);
-        }
+        String deleteQuery = String.format("DELETE FROM TREATMENTS WHERE TreatmentID=%d", treatmentID);
+        PreparedStatement deleteStatement = dbConnect.prepareStatement(deleteQuery);
+        deleteStatement.executeUpdate();
 
         disconnectFromDatabase();
     }
 
-    public void editTreatmentDB(int treatmentID, int newStartHour) {
+    public void editTreatmentDB(int treatmentID, int newStartHour) throws  SQLException {
         connectToDataBase();
 
-        try {
-            String updateQuery = String.format("UPDATE TREATMENTS SET StartHour=%d WHERE TreatmentID=%d",newStartHour, treatmentID);
-            PreparedStatement updateStatement = dbConnect.prepareStatement(updateQuery);
-            updateStatement.executeUpdate();
-        } catch(SQLException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
+        String updateQuery = String.format("UPDATE TREATMENTS SET StartHour=%d WHERE TreatmentID=%d",newStartHour, treatmentID);
+        PreparedStatement updateStatement = dbConnect.prepareStatement(updateQuery);
+        updateStatement.executeUpdate();
 
         disconnectFromDatabase();
     }
@@ -335,60 +334,52 @@ public class EwrScheduler {
     }
 
     // Creates a text file containing the finalized schedule for the day.
-    public void printSchedule() {
-        String fileName = "ewrSchedule_" + DATE.toString() + ".txt";
+    public void printSchedule(String filename) throws  IOException {
+        BufferedWriter textFileOut;
+        textFileOut = new BufferedWriter(new FileWriter(filename));
+
         String line;
-        BufferedWriter textFileOut = null;
-        try {
-            textFileOut = new BufferedWriter(new FileWriter(fileName));
-        } catch(IOException e) {
-            System.out.println("Unable to open or create file 'schedule.txt'");
-            System.exit(1); // TODO: exception handling
-        }
 
-        try {
-            textFileOut.write(
-                    "|--------------------------------------------------------------|\n" +
-                    "|            Example Wildlife Rescue Daily Schedule            |\n" +
-                    "|--------------------------------------------------------------|\n");
-            line = String.format("| Date: %-55s|\n", DATE);
-            textFileOut.write(line);
+        textFileOut.write(
+                "|--------------------------------------------------------------|\n" +
+                "|            Example Wildlife Rescue Daily Schedule            |\n" +
+                "|--------------------------------------------------------------|\n");
 
-            ArrayList<Task> hour;
-            for (int i = 0; i < 24; i++) {
-                hour = hourlyTasksLocked[i];
-                line = String.format("|%63s\n|   %02d:00", "|", i);
-                if(backupHour == i) {
-                    line += " [Backup volunteer scheduled] <------------------ !   |\n";
-                    hour.addAll(hourlyTasksLocked[24]);
-                } else {
-                    line += "                                                      |\n";
-                }
-                textFileOut.write(line);
-                if(hour.isEmpty()) {
-                    line = String.format("|   - %-57s|\n",
-                            "Nothing scheduled for hour");
-                    textFileOut.write(line);
-                }
-                for (Task task : hour) {
-                    line = String.format("|   - %-57s|\n",
-                            task.getDescription() +
-                            " (" + task.getPatient().getName() + ")");
-                    textFileOut.write(line);
-                }
+        line = String.format("| Date: %-55s|\n", DATE);
+        textFileOut.write(line);
+
+        ArrayList<Task> hour;
+        for (int i = 0; i < 24; i++) {
+            hour = hourlyTasksLocked[i];
+            line = String.format("|%63s\n|   %02d:00", "|", i);
+            if(backupHour == i) {
+                line += " [Backup volunteer scheduled] <------------------ !   |\n";
+                hour.addAll(hourlyTasksLocked[24]);
+            } else {
+                line += "                                                      |\n";
             }
-            textFileOut.write(
-                    "|                                                              |\n" +
-                    "|--------------------------------------------------------------|");
-            textFileOut.close();
-        } catch(IOException e) {
-            System.out.println("Issues writing to file 'schedule.txt'"); // TODO
+            textFileOut.write(line);
+            if(hour.isEmpty()) {
+                line = String.format("|   - %-57s|\n",
+                        "Nothing scheduled for hour");
+                textFileOut.write(line);
+            }
+            for (Task task : hour) {
+                line = String.format("|   - %-57s|\n",
+                        task.getDescription() + " (" +
+                        task.getPatient().getName() + ")");
+                textFileOut.write(line);
+            }
         }
+        textFileOut.write(
+                "|                                                              |\n" +
+                "|--------------------------------------------------------------|");
+        textFileOut.close();
     }
 
     // Populates taskList with the Tasks contained in each Animal object, and
     // the tasks in the database.
-    private void buildTaskLists() {
+    private void buildTaskLists() throws SQLException, IllegalArgumentException {
         // Create Hashmap to sort animals by species (to group like feeding tasks)
         HashMap<String, ArrayList<Animal>> aniMap = new HashMap<>();
         for(Animal patient : patientMap.values()) {
@@ -405,122 +396,112 @@ public class EwrScheduler {
             }
         }
 
-
         connectToDataBase();
 
         // Populate taskMap with incomplete Tasks
-        try {
-            Statement treatStmt = dbConnect.createStatement();
-            Statement taskStmt = dbConnect.createStatement();
-            ResultSet treatments = treatStmt.executeQuery("SELECT * FROM TREATMENTS");
-            ResultSet taskRow;
-            Task newTask;
+        Statement treatStmt = dbConnect.createStatement();
+        Statement taskStmt = dbConnect.createStatement();
+        ResultSet treatments = treatStmt.executeQuery("SELECT * FROM TREATMENTS");
+        ResultSet taskRow;
+        Task newTask;
 
-            // Create tasks from data in table TREATMENTS
-            while(!treatments.isLast()) {
-                treatments.next();
-                // Fetch row from TASKS with TaskID from TREATMENTS
-                taskRow = taskStmt.executeQuery(
-                    "SELECT * FROM TASKS WHERE TaskID=" + treatments.getInt("TaskID"));
-                taskRow.next();
-                // Create new Task from row in TASKS
-                newTask = new Task(
-                        treatments.getInt("TreatmentID"),
-                        taskRow.getString("Description"),
-                        0,
-                        taskRow.getInt("Duration"),
-                        treatments.getInt("StartHour"),
-                        24
-                        );
-                // Set windowEndHour if it is less than 24
-                if(newTask.getWindowStartHour() + taskRow.getInt("MaxWindow") < 24) {
-                    newTask.setWindowEndHour(
-                            newTask.getWindowStartHour() + taskRow.getInt("MaxWindow")
-                    );
-                }
-                // Assign a patient to the Task
-                newTask.setPatient(patientMap.get(treatments.getInt("AnimalID")));
-
-                taskList.add(newTask);
+        // Create tasks from data in table TREATMENTS
+        while(!treatments.isLast()) {
+            treatments.next();
+            // Fetch row from TASKS with TaskID from TREATMENTS
+            taskRow = taskStmt.executeQuery(
+                    "SELECT * FROM TASKS WHERE TaskID=" +
+                            treatments.getInt("TaskID"));
+            taskRow.next();
+            // Create new Task from row in TASKS
+            newTask = new Task(
+                    treatments.getInt("TreatmentID"),
+                    taskRow.getString("Description"),
+                    0,
+                    taskRow.getInt("Duration"),
+                    treatments.getInt("StartHour"),
+                    24
+            );
+            // Set windowEndHour if it is less than 24
+            if(newTask.getWindowStartHour() + taskRow.getInt("MaxWindow") < 24) {
+                newTask.setWindowEndHour(
+                        newTask.getWindowStartHour() + taskRow.getInt("MaxWindow")
+                );
             }
-            treatStmt.close();
-            taskStmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();  // TODO: proper error handling
+            // Assign a patient to the Task
+            newTask.setPatient(patientMap.get(treatments.getInt("AnimalID")));
+
+            taskList.add(newTask);
         }
+        treatStmt.close();
+        taskStmt.close();
+
         disconnectFromDatabase();
     }
 
     // Populates patientMap with the data in the database.
-    private void buildPatientMap() {
+    private void buildPatientMap() throws SQLException {
         connectToDataBase();
         Animal currentRow;
 
-        try {
-            // Fill resultSet with animal table
-            Statement myStmt = dbConnect.createStatement();
-            ResultSet results = myStmt.executeQuery("SELECT * FROM ANIMALS");
 
-            // Convert each row of database to an Animal object and add to
-            // patientMap
-            while(!results.isLast()) {
-                results.next();
-                // Get species of entry and use the right constructor
-                switch(results.getString("AnimalSpecies")) {
-                    case "fox":
-                        currentRow = new Fox(
-                                results.getString("AnimalNickname"),
-                                results.getInt("AnimalID")
-                        );
-                        break;
-                    case "porcupine":
-                        currentRow = new Porcupine(
-                                results.getString("AnimalNickname"),
-                                results.getInt("AnimalID")
-                        );
-                        break;
-                    case "beaver":
-                        currentRow = new Beaver(
-                                results.getString("AnimalNickname"),
-                                results.getInt("AnimalID")
-                        );
-                        break;
-                    case "coyote":
-                        currentRow = new Coyote(
-                                results.getString("AnimalNickname"),
-                                results.getInt("AnimalID")
-                        );
-                        break;
-                    case "raccoon":
-                        currentRow = new Raccoon(
-                                results.getString("AnimalNickname"),
-                                results.getInt("AnimalID")
-                        );
-                        break;
-                    default:
-                        throw new SQLDataException("Table ANIMALS contains row with invalid species");
-                }
-                patientMap.put(currentRow.getID(), currentRow);
+        // Fill resultSet with animal table
+        Statement myStmt = dbConnect.createStatement();
+        ResultSet results = myStmt.executeQuery("SELECT * FROM ANIMALS");
+
+        // Convert each row of database to an Animal object and add to
+        // patientMap
+        while(!results.isLast()) {
+            results.next();
+            // Get species of entry and use the right constructor
+            switch(results.getString("AnimalSpecies")) {
+                case "fox":
+                    currentRow = new Fox(
+                            results.getString("AnimalNickname"),
+                            results.getInt("AnimalID")
+                    );
+                    break;
+                case "porcupine":
+                    currentRow = new Porcupine(
+                            results.getString("AnimalNickname"),
+                            results.getInt("AnimalID")
+                    );
+                    break;
+                case "beaver":
+                    currentRow = new Beaver(
+                            results.getString("AnimalNickname"),
+                            results.getInt("AnimalID")
+                    );
+                    break;
+                case "coyote":
+                    currentRow = new Coyote(
+                            results.getString("AnimalNickname"),
+                            results.getInt("AnimalID")
+                    );
+                    break;
+                case "raccoon":
+                    currentRow = new Raccoon(
+                            results.getString("AnimalNickname"),
+                            results.getInt("AnimalID")
+                    );
+                    break;
+                default:
+                    throw new SQLDataException("Table ANIMALS contains row with invalid species");
             }
-            myStmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();  // TODO: proper error handling
+            patientMap.put(currentRow.getID(), currentRow);
         }
+        myStmt.close();
         disconnectFromDatabase();
     }
 
     // Attempts to connect to the database.
-    private void connectToDataBase() {
-        try{
-            dbConnect = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
-            e.printStackTrace();  // TODO: proper error handling
-        }
+    private void connectToDataBase() throws SQLException {
+        dbConnect = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
     }
 
     // Attempts to disconnect from database
-    private void disconnectFromDatabase() {
-        try { if (dbConnect != null) dbConnect.close(); } catch (SQLException e) {e.printStackTrace();}  // TODO: proper error handling
+    private void disconnectFromDatabase() throws SQLException {
+        if (dbConnect != null) dbConnect.close();
     }
 
     public void testDbConnection() throws SQLException {
@@ -529,9 +510,10 @@ public class EwrScheduler {
     }
 
     // Returns value of backupScheduled flag
-    private boolean isBackupScheduled() {
+    public boolean isBackupScheduled() {
         return backupScheduled;
     }
 
+    public int getBackupHour() { return this.backupHour; }
     public LocalDate getDate() { return this.DATE; }
 }
