@@ -2,7 +2,7 @@
  @author Mariyah Malik
  @author Ethan Reed
  <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
- @version 0.3
+ @version 0.8
  @since 0.1
  */
 
@@ -24,7 +24,8 @@ public class Task {
     private boolean scheduled = false;
 
     // Constructor:
-    public Task(String description, int prepTime, int duration, int windowStartHour, int windowEndHour) {
+    public Task(String description, int prepTime, int duration, int windowStartHour, int windowEndHour)
+    throws IllegalArgumentException {
         this.description = description;
         this.prepTime = prepTime;
         this.duration = duration;
