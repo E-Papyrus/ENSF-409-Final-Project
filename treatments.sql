@@ -39,6 +39,7 @@ INSERT INTO ANIMALS (AnimalID, AnimalNickname, AnimalSpecies) VALUES
 (15, 'Spot', 'coyote'),
 (16, 'Busy', 'beaver');
 
+
 DROP TABLE IF EXISTS TASKS;
 CREATE TABLE TASKS (
 	TaskID			int not null AUTO_INCREMENT,
@@ -102,3 +103,7 @@ INSERT INTO TREATMENTS (AnimalID, TaskID, StartHour) VALUES
 (16, 11, 0),
 (16, 11, 22),
 (15, 8, 13);
+
+INSERT INTO TREATMENTS (AnimalID, TaskID, StartHour) VALUES
+(16, 11, 22),
+(16, 11, 22);
