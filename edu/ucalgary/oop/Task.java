@@ -1,17 +1,14 @@
-/**
- @author Mariyah Malik
- @author Ethan Reed
- <a href="mailto:mariyah.malik@ucalgary.ca?cc=ethan.reed@ucalgary.ca">Email the authors</a>
- @version 0.8
- @since 0.1
- */
-
 package edu.ucalgary.oop;
 
-/*
-Class to contain any relevant information about the tasks to be scheduled at
-EWR. Contains logic to validate the state of any created objects.
-*/
+/**
+ * Class to contain any relevant information about the tasks to be scheduled at
+ * EWR. Contains logic to validate the state of any created objects.
+ *
+ * @author      Mariyah Malik
+ * @author      Ethan Reed
+ * @version     1.0
+ * @since       0.1
+ */
 public class Task {
     private int treatmentID = -1;
     private String description;
@@ -23,7 +20,27 @@ public class Task {
 
     private boolean scheduled = false;
 
-    // Constructor:
+    /**
+     * Creates a new Task object with the default treatment ID.
+     *
+     * @param  description
+     *         Description of task
+     *
+     * @param  prepTime
+     *         Required prep time for task
+     *
+     * @param  duration
+     *         Minutes required to complete task
+     *
+     * @param  windowStartHour
+     *         First hour in which task can be scheduled
+     *
+     * @param  windowEndHour
+     *         Hour after last in which task can be scheduled
+     *
+     * @throws IllegalArgumentException
+     *         Thrown if task validation fails
+     */
     public Task(String description, int prepTime, int duration, int windowStartHour, int windowEndHour)
     throws IllegalArgumentException {
         this.description = description;
@@ -35,6 +52,30 @@ public class Task {
         validateTask();
     }
 
+    /**
+     * Creates a new Task object with custom TreatmentID.
+     *
+     * @param  treatmentID
+     *         ID number of task
+     *
+     * @param  description
+     *         Description of task
+     *
+     * @param  prepTime
+     *         Required prep time for task
+     *
+     * @param  duration
+     *         Minutes required to complete task
+     *
+     * @param  windowStartHour
+     *         First hour in which task can be scheduled
+     *
+     * @param  windowEndHour
+     *         Hour after last in which task can be scheduled
+     *
+     * @throws IllegalArgumentException
+     *         Thrown if task validation fails
+     */
     public Task(int treatmentID, String description, int prepTime, int duration, int windowStartHour, int windowEndHour) {
         this(description, prepTime, duration, windowStartHour, windowEndHour);
         this.treatmentID = treatmentID;
@@ -88,19 +129,22 @@ public class Task {
         this.windowEndHour = windowEndHour;
         validateTask();
     }
-
     // Return true if Task has been scheduled.
     public boolean isScheduled() {
         return scheduled;
     }
-
     // Sets scheduled.
     public void setScheduled(boolean scheduled) {
         this.scheduled = scheduled;
     }
 
-    // A series of checks on the data members of a Task object. Throws an
-    // IllegalArgumentException if the Task is in an invalid state.
+    /**
+     * Runs a series of checks on the data members of this Task object to check
+     * the Task's validity.
+     *
+     * @throws  IllegalArgumentException
+     *          If any of the checks fail
+     */
     private void validateTask() {
         if(windowStartHour >= windowEndHour) {
             throw new IllegalArgumentException("Invalid task: window ends before it begins");
