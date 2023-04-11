@@ -9,7 +9,7 @@ All user interaction is through a GUI and the application connects to a database
 data input.
 
 To use the application, clone the repository, and run one of the SQL scripts in the
-'example_DB_scripts' to create database with the url "jdbc:mysql://localhost:3306/ewr".
+'example_DB_scripts' to create a database with the url "jdbc:mysql://localhost:3306/ewr".
 Upon running the Interface class, you will be prompted to enter a username and password;
 these are the login credentials you would use to connect to the database. By default, 
 the user 'oop'@'localhost' is added to the database with the password 'password'.
