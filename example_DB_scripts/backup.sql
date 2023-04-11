@@ -1,6 +1,9 @@
 /* W23 Project Example Database
    2023 Barcomb
- 
+
+   Modified by Ethan Reed.
+   In this state, backup is required.
+
  Each time this file is executed, it will reset the database to the original state defined below.
  
  */
@@ -102,8 +105,5 @@ INSERT INTO TREATMENTS (AnimalID, TaskID, StartHour) VALUES
 (14, 8, 13),
 (16, 11, 0),
 (16, 11, 22),
-(15, 8, 13);
-
-INSERT INTO TREATMENTS (AnimalID, TaskID, StartHour) VALUES
 (16, 11, 22),
-(16, 11, 22);
+(15, 8, 13);
