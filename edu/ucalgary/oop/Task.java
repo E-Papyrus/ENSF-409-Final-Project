@@ -10,7 +10,7 @@ package edu.ucalgary.oop;
  * @since       0.1
  */
 public class Task {
-    private int treatmentID = -1;
+    private int treatmentID;
     private String description;
     private Animal patient;
     private int prepTime;
@@ -43,6 +43,7 @@ public class Task {
      */
     public Task(String description, int prepTime, int duration, int windowStartHour, int windowEndHour)
     throws IllegalArgumentException {
+        this.treatmentID = -1;
         this.description = description;
         this.prepTime = prepTime;
         this.duration = duration;
@@ -102,6 +103,7 @@ public class Task {
     public Animal getPatient() {
         return patient;
     }
+    public void setTreatmentID(int id) { this.treatmentID = id; }
     public void setPatient(Animal patient) {
         this.patient = patient;
     }

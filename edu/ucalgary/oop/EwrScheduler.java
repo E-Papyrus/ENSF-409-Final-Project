@@ -32,9 +32,9 @@ public class EwrScheduler {
 
     // Credentials for super secure database:
     private Connection dbConnect;
-    public final static String DB_URL = "jdbc:mysql://localhost:3306/ewr";
+    private final static String DB_URL = "jdbc:mysql://localhost:3306/ewr";
     private final String USERNAME;
-    public final String PASSWORD;
+    private final String PASSWORD;
 
     /**
      * Creates a new, uninitialized EwrScheduler with the provided database
@@ -152,7 +152,7 @@ public class EwrScheduler {
      * @throws  SQLException
      *          If an SQL error occurs
      */
-    public void editTreatmentDB(int treatmentID, int newStartHour) throws  SQLException {
+    public void editTreatmentDB(int treatmentID, int newStartHour) throws SQLException {
         connectToDataBase();
 
         String updateQuery = String.format("UPDATE TREATMENTS SET StartHour=%d WHERE TreatmentID=%d",newStartHour, treatmentID);
@@ -171,7 +171,7 @@ public class EwrScheduler {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    public void printSchedule(String filename) throws  IOException {
+    public void printSchedule(String filename) throws IOException {
         BufferedWriter textFileOut;
         textFileOut = new BufferedWriter(new FileWriter(filename));
 
