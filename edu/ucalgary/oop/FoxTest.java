@@ -4,8 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.beans.Transient;
-
 public class FoxTest {
     private Fox fox;
 
@@ -26,11 +24,11 @@ public class FoxTest {
     @Test
     public void testCleaningTask() {
         Task task = fox.getTasks().get(0);
-        assertEquals("Cage cleaning", task.getName());
+        assertEquals("Cage cleaning", task.getDescription());
         assertEquals(0, task.getPrepTime());
         assertEquals(5, task.getDuration());
-        assertEquals(0, task.getStartTime());
-        assertEquals(24, task.getEndTime());
+        assertEquals(0, task.getWindowStartHour());
+        assertEquals(24, task.getWindowEndHour());
         assertEquals(fox, task.getPatient());
     }
 

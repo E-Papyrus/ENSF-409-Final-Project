@@ -10,7 +10,7 @@ public class CrepuscularAnimalTest {
         CrepuscularAnimal animal = new MockCrepuscularAnimal("Test Animla", 123, "Test Species");
 
         assertEquals("Test Animal", animal.getName());
-        assertEquals(123, aanimal.getId());
+        assertEquals(123, animal.getID());
         assertEquals("Test Species", animal.getSpecies());
         assertTrue(animal.getPrepTime() >= 0);
         assertTrue(animal.getFeedTime() >= 0);
@@ -23,9 +23,9 @@ public class CrepuscularAnimalTest {
             assertEquals("Test Species feeding", task.getDescription());
             assertEquals(animal, task.getPatient());
             assertTrue(task.getPrepTime() >= 0);
-            asssertTrue(task.getDuration() >= 0);
-            assertEquals(CrepuscularAnimal.FEEDING_START, task.getStartTime());
-            assertEquals(CrepuscularAnimal.FEEDING_END, task.getEndTime());
+            assertTrue(task.getDuration() >= 0);
+            assertEquals(CrepuscularAnimal.FEEDING_START, task.getWindowStartHour());
+            assertEquals(CrepuscularAnimal.FEEDING_END, task.getWindowEndHour());
         }
     }
 

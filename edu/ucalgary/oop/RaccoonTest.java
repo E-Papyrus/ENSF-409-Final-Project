@@ -3,8 +3,6 @@ package edu.ucalgary.oop;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.beans.Transient;
-
 public class RaccoonTest {
 
     @Test
@@ -17,12 +15,12 @@ public class RaccoonTest {
         assertEquals(ID, raccoon.getID());
         assertEquals("Racoon", raccoon.getSpecies());
 
-        Task cleaning = raccoon.getTask(0);
-        assertEquals("Cage cleaning", cleaning.getName());
-        assertEquals(0, cleaning.PrepTime());
+        Task cleaning = raccoon.getTasks().get(0);
+        assertEquals("Cage cleaning", cleaning.getDescription());
+        assertEquals(0, cleaning.getPrepTime());
         assertEquals(5, cleaning.getDuration());
-        assertEquals(0, cleaning.getFrequency());
-        assertEquals(24, cleaning.getStartTime());
+        assertEquals(0, cleaning.getWindowStartHour());
+        assertEquals(24, cleaning.getWindowEndHour());
         assertEquals(raccoon, cleaning.getPatient());
     }
 

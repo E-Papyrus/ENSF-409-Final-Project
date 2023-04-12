@@ -24,7 +24,7 @@ public class TaskTest {
         assertEquals(30, task.getPrepTime());
         assertEquals(60, task.getDuration());
         assertEquals(9, task.getWindowStartHour());
-        assertEquals(12, task.getWWindowEndHour());
+        assertEquals(12, task.getWindowEndHour());
     }
 
     @Test(expected = IllegalArgumentException.class)

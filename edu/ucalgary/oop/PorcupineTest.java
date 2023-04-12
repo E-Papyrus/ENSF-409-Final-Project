@@ -9,18 +9,18 @@ public class PorcupineTest {
     public void testPorcupineConstructor() {
         String name = "Percy";
         int ID = 1;
-        Porcupine porcupine = new Porcupine(namee, ID);
+        Porcupine porcupine = new Porcupine(name, ID);
 
         assertEquals(name, porcupine.getName());
         assertEquals(ID, porcupine.getID());
         assertEquals("Porcupine", porcupine.getSpecies());
 
-        Task cleaning = porcupine.getTask(0);
-        assertEquals("Cage cleaning", cleaning.getName());
+        Task cleaning = porcupine.getTasks().get(0);
+        assertEquals("Cage cleaning", cleaning.getDescription());
         assertEquals(0, cleaning.getPrepTime());
         assertEquals(10, cleaning.getDuration());
-        assertEquals(0, cleaning.getFrequency());
-        assertEquals(24, cleaning.getStartTime());
+        assertEquals(0, cleaning.getWindowStartHour());
+        assertEquals(24, cleaning.getWindowEndHour());
         assertEquals(porcupine, cleaning.getPatient());
     }
 
