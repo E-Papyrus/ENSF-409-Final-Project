@@ -654,6 +654,7 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
                 generateInstructions.setText(
                         "Filename must be in form 'filename.txt'");
                 generateInstructions.setForeground(Color.red);
+                return;
             }
             // Set filename to input (with spaces replaced by underscores)
             filename = fileMatcher.group().replace(' ', '_');
