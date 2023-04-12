@@ -4,8 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.beans.Transient;
-
 public class NocturnalAnimalTest {
 
     private NocturnalAnimal individualAnimal;
@@ -52,8 +50,8 @@ public class NocturnalAnimalTest {
         assertEquals("Feeding", feedingTask.getDescription());
         assertEquals(1, feedingTask.getPrepTime());
         assertEquals(2, feedingTask.getDuration());
-        assertEquals(0, feedingTask.getStartHour());
-        assertEquals(3, feedingTask.getEndHour());
+        assertEquals(0, feedingTask.getWindowStartHour());
+        assertEquals(3, feedingTask.getWindowEndHour());
         assertEquals(individualAnimal, feedingTask.getPatient());
     }
 

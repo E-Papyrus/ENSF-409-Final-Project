@@ -3,8 +3,6 @@ package edu.ucalgary.oop;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.beans.Transient;
-
 public class DiurnalAnimalTest {
 
     @Test
@@ -12,7 +10,7 @@ public class DiurnalAnimalTest {
         DiurnalAnimal animal = new MockDiurnalAnimal("Test Animal", 123, "Test Species");
 
         assertEquals("Test Animal", animal.getName());
-        assertEquals(123, animal.getId());
+        assertEquals(123, animal.getID());
         assertEquals("Test Species", animal.getSpecies());
         assertTrue(animal.getPrepTime() >= 0);
         assertTrue(animal.getFeedTime() >= 0);
@@ -26,8 +24,8 @@ public class DiurnalAnimalTest {
             assertEquals(animal, task.getPatient());
             assertTrue(task.getPrepTime() >= 0);
             assertTrue(task.getDuration() >= 0);
-            assertEquals(DiurnalAnimal.FEEDING_START, task.getStartTime());
-            assertEquals(DiurnalAnimal.FEEDING_END, task.getEndTime());
+            assertEquals(DiurnalAnimal.FEEDING_START, task.getWindowStartHour());
+            assertEquals(DiurnalAnimal.FEEDING_END, task.getWindowEndHour());
         }
     }
 

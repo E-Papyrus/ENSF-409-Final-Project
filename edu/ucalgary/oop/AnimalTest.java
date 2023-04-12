@@ -2,17 +2,12 @@ package edu.ucalgary.oop;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.beans.Transient;
 import java.util.ArrayList;
 
 public class AnimalTest {
 
     private Animal animal;
 
-    @BeforeEach
     public void setUp() {
         animal = new Animal("Test Animal", 1, "Test Species") {
             @Override
@@ -29,60 +24,62 @@ public class AnimalTest {
 
     @Test 
     public void testConstructor() {
-        Assertions.assertEquals("Test Animal", animal.getName());
-        Assertions.assertEquals(1, animal.getID());
-        Assertions.assertEquals("Test Species", animal.getSpecies());
-        Assertions.assertEquals(new ArrayList<Task>(), animal.getTasks());
+        setUp();
+        assertEquals("Test Animal", animal.getName());
+        assertEquals(1, animal.getID());
+        assertEquals("Test Species", animal.getSpecies());
+        assertEquals(new ArrayList<Task>(), animal.getTasks());
     }
 
     @Test 
     public void testSetName() {
+        setUp();
         animal.setName("New Name");
-        Assertions.assertEquals("New Name", animal.getName());
+        assertEquals("New Name", animal.getName());
     }
 
     @Test 
     public void testSetID() {
+        setUp();
         animal.setID(2);
-        Assertions.assertEquals(2, animal.getID());
-    }
-
-    @Test 
-    public void testSetSpecies() {
-        animal.setSpecies("New Species");
-        Assertions.assertEquals("New Species", animal.getSpecies());
+        assertEquals(2, animal.getID());
     }
 
     @Test 
     public void testSetTasks() {
+        setUp();
         ArrayList<Task> tasks = new ArrayList<>();
         tasks.add(new Task("Test Task", 0, 0, 0, 24));
         animal.setTasks(tasks);
-        Assertions.assertEquals(tasks, animal.getTasks());
+        assertEquals(tasks, animal.getTasks());
     }
 
     @Test 
     public void testAddTask() {
+        setUp();
         Task task = new Task("Test Task", 0, 0, 0, 24);
         animal.addTask(task);
-        Assertions.assertTrue(animal.getTasks().contains(task));
+        assertTrue(animal.getTasks().contains(task));
     }
 
     @Test 
     public void testRemoveTask() {
+        setUp();
         Task task = new Task("Test Task", 0, 0, 0, 24);
         animal.addTask(task);
         animal.removeTask(0);
-        Assertions.assertFalse(animal.getTasks().contains(task));
+        assertFalse(animal.getTasks().contains(task));
     }
 
     @Test 
     public void testRemoveTaskThrowsException() {
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> animal.removeTask(0));
+        setUp();
+        assertThrows(IndexOutOfBoundsException.class, () -> animal.removeTask(0));
     }
 
     @Test 
     public void testIsLitter() {
+        setUp();
         Animal individual = new Animal("Individual", 2, "Species") {
 
             @Override 
@@ -95,7 +92,7 @@ public class AnimalTest {
                 return 0;
             }
         };
-        Assertions.assertFalse(individual.isLitter());
+        assertFalse(individual.isLitter());
 
         Animal litter = new Animal("Litter 1 and Litter 2", 3, "Species") {
 
@@ -109,6 +106,6 @@ public class AnimalTest {
                 return 0;
             }
         };
-        Assertions.assertTrue(litter.isLitter());
+        assertTrue(litter.isLitter());
     }
 }

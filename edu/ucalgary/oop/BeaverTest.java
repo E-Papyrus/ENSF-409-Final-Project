@@ -17,8 +17,8 @@ public class BeaverTest {
         assertEquals("Beaver cage cleaning", cleaningTask.getDescription());
         assertEquals(0, cleaningTask.getPrepTime());
         assertEquals(5, cleaningTask.getDuration());
-        assertEquals(0, cleaningTask.getStartHour());
-        assertEquals(24, cleaningTask.getEndHour());
+        assertEquals(0, cleaningTask.getWindowStartHour());
+        assertEquals(24, cleaningTask.getWindowEndHour());
         assertEquals(beaver, cleaningTask.getPatient());
     }
 
