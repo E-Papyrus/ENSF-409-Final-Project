@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public abstract class Animal {
     private String name;
     private int id;
-    private String species;
+    private final String SPECIES;
     private ArrayList<Task> tasks;
 
     /**
@@ -35,18 +35,17 @@ public abstract class Animal {
     public Animal(String name, int id, String species) {
         this.name = name;
         this.id = id;
-        this.species = species;
+        this.SPECIES = species;
         tasks = new ArrayList<>();
     }
 
     // Getters and setters:
     public String getName() { return name; }
     public int getID() { return id; }
-    public String getSpecies() { return species; }
+    public String getSpecies() { return SPECIES; }
     public ArrayList<Task> getTasks() { return tasks; }
     public void setName(String name) { this.name = name; }
     public void setID(int id) { this.id = id; }
-    public void setSpecies(String species) { this.species = species; }
     public void setTasks(ArrayList<Task> tasks) { this.tasks = tasks; }
 
     /**

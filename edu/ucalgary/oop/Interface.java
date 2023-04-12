@@ -1,7 +1,5 @@
 package edu.ucalgary.oop;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.TableModelListener;
@@ -37,8 +35,8 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
 
     // Objects used for styling the multiple pages of the GUI
     private final Dimension MIN_WIN_SIZE = new Dimension(1000, 700);
-    public final static Color BACKGROUND_C = new Color(0xF0EEE8);
-    public final static Color FOREGROUND_C = new Color(0x4C8C5C);
+    private final Color BACKGROUND_C = new Color(0xF0EEE8);
+    private final Color FOREGROUND_C = new Color(0x4C8C5C);
     private Border fieldBorder = BorderFactory.createLineBorder(FOREGROUND_C);
 
     // Objects used in login page
@@ -512,7 +510,7 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
             } catch(IllegalStateException e) {
                 impossibleSchedule = true;
             } catch(SQLException e) {
-                displayError(this, "An unknown error occurred while creating schedule");
+                displayError(this, "An unknown error occurred while creating the schedule.");
             } catch(IllegalArgumentException e) {
                 displayError(this, "Database contains an invalid treatment.");
             }
@@ -744,12 +742,24 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
         // Attempt connection and provide message if unsuccessful
         try {
             scheduler.testDbConnection();
-        } catch (CommunicationsException e) {
+        /*} catch (CommunicationsException e) {
             loginInstructions.setText("Error: Unable to connect to database");
             loginInstructions.setForeground(Color.red);
-            return null;
+            return null;*/
         } catch (SQLException e) {
-            loginInstructions.setText("Incorrect username or password.");
+            int errorCode = e.getErrorCode();
+            if(errorCode == 0) {
+                loginInstructions.setText("Error: Unable to connect to MySQL server");
+            } else if(errorCode == 1045) {
+                loginInstructions.setText("Incorrect username or password.");
+            } else if(errorCode == 1044 ||
+                    errorCode == 1046 ||
+                    errorCode == 1049) {
+                loginInstructions.setText("Error: Database not found");
+            } else {
+                loginInstructions.setText(
+                        "Unexpected database error: MySQL#" + e.getErrorCode());
+            }
             loginInstructions.setForeground(Color.red);
             return null;
         }
