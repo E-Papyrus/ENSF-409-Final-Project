@@ -295,8 +295,15 @@ public class EwrScheduler {
      * hour added to the backup hour's real position.
      */
     public ArrayList<Task>[] getSchedule() {
-        ArrayList<Task>[] copySchedule = Arrays.copyOf(hourlyTasksLocked, 24);
-        if(backupHour >= 0 && backupHour < 24) copySchedule[backupHour].addAll(hourlyTasksLocked[24]);
+        // Create an array containing clones of the hourly lists
+        ArrayList<Task>[] copySchedule = new ArrayList[24];
+        for(int i = 0; i < 24; i++) {
+            copySchedule[i] = (ArrayList<Task>) hourlyTasksLocked[i].clone();
+        }
+        // Add the tasks from the backup hour to another if needed
+        if(backupHour >= 0 && backupHour < 24) {
+            copySchedule[backupHour].addAll(hourlyTasksLocked[24]);
+        }
         return copySchedule;
     }
 
