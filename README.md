@@ -6,7 +6,7 @@ fictional wildlife rescue.
 
 The application was created in Java using the java.sql, java.swing, and java.awt libraries.
 All user interaction is through a GUI and the application connects to a database for
-data input.
+data input. Note that use of this application requires mySQL.
 
 To use the application, clone the repository, and run one of the SQL scripts in the
 'example_DB_scripts' to create a database with the url "jdbc:mysql://localhost:3306/ewr".
