@@ -165,15 +165,15 @@ public class EwrScheduler {
     /**
      * Creates a text file containing the finalized schedule for the day.
      *
-     * @param  filename
-     *         Name of file to be created and/or written to
+     * @param  filePath
+     *         Path of file to be created and/or written to
      *
      * @throws  IOException
      *          If an I/O error occurs
      */
-    public void printSchedule(String filename) throws IOException {
+    public void printSchedule(String filePath) throws IOException {
         BufferedWriter textFileOut;
-        textFileOut = new BufferedWriter(new FileWriter(filename));
+        textFileOut = new BufferedWriter(new FileWriter(filePath));
 
         String line;
 

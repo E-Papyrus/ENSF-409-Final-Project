@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,8 +49,7 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
     // Objects used in schedule creation page
     private JButton generateButton;
     private JLabel generateInstructions;
-    private JButton printButton;
-    private JTextField filenameField;
+    private JButton saveButton;
     private ArrayList<JPanel> hourTablePanels;
     private ArrayList<JLabel> hourTableLabels;
 
@@ -80,9 +80,12 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
         this.setResizable(false);
 
         // Logo display
-        ImageIcon logo = new ImageIcon("logo.png");
         JLabel logoLabel = new JLabel("Volunteer Task Scheduler");
-        logoLabel.setIcon(logo);
+        URL logoURL = this.getClass().getResource("/resources/logo.png");
+        if (logoURL != null) {
+            ImageIcon logo = new ImageIcon(logoURL);
+            logoLabel.setIcon(logo);
+        }
         logoLabel.setForeground(FOREGROUND_C);
         logoLabel.setHorizontalTextPosition(JLabel.RIGHT);
         logoLabel.setVerticalTextPosition(JLabel.CENTER);
@@ -202,10 +205,10 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
         generateButton.setAlignmentX(JComponent.CENTER_ALIGNMENT);
 
         // Print to file button
-        printButton = new JButton("Print to file");
-        printButton.addActionListener(this);
-        printButton.setEnabled(false);
-        printButton.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        saveButton = new JButton("Save Schedule");
+        saveButton.addActionListener(this);
+        saveButton.setEnabled(false);
+        saveButton.setAlignmentX(JComponent.CENTER_ALIGNMENT);
 
         // Schedule grid panel
         GridLayout scheduleGrid = new GridLayout(6, 4, 2, 0);
@@ -235,15 +238,6 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
             schedulePanel.add(hourPanel);
         }
 
-        // Filename field
-        Dimension filenameSize = new Dimension(200, 20);
-        filenameField = new JTextField();
-        filenameField.setEnabled(false);
-        filenameField.setMaximumSize(filenameSize);
-        filenameField.setPreferredSize(filenameSize);
-        filenameField.setBorder(fieldBorder);
-        filenameField.setAlignmentX(JComponent.CENTER_ALIGNMENT);
-
         // Instruction label
         generateInstructions = new JLabel("Press button to build schedule");
         generateInstructions.setAlignmentX(JComponent.CENTER_ALIGNMENT);
@@ -261,8 +255,7 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
         buttonPanel.add(Box.createVerticalStrut(100));
         buttonPanel.add(generateButton);
         buttonPanel.add(Box.createVerticalStrut(100));
-        buttonPanel.add(filenameField);
-        buttonPanel.add(printButton);
+        buttonPanel.add(saveButton);
         buttonPanel.add(Box.createVerticalGlue());
 
         // Schedule header
@@ -642,11 +635,19 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
             // Return to schedule creation page
             createScheduleGUI();
 
-        } else if(source.equals(printButton)) { // Print to file button
+        } else if(source.equals(saveButton)) { // Print to file button
+
+            String savePath;
+
+            // Open new fileChooser window and save user selection
+            JFileChooser saveChooser = new JFileChooser();
+            int saveResponse = saveChooser.showSaveDialog(null);
+            // Return if user selected close or cancel
+            if(saveResponse != JFileChooser.APPROVE_OPTION) return;
 
             // Parse filename
             Pattern filePattern = Pattern.compile("^[\\w -]+\\.txt$");
-            String filename = filenameField.getText().trim();
+            String filename = saveChooser.getName(saveChooser.getSelectedFile());
             Matcher fileMatcher = filePattern.matcher(filename);
 
             // Provide instructions if filename was not in valid format
@@ -656,18 +657,20 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
                 generateInstructions.setForeground(Color.red);
                 return;
             }
-            // Set filename to input (with spaces replaced by underscores)
-            filename = fileMatcher.group().replace(' ', '_');
-            // Create the file
+
+            // Retrieve the filepath
+            savePath = saveChooser.getSelectedFile().getAbsolutePath();
+
+            // Attempt to create file
             try {
-                ewrScheduler.printSchedule(filename);
+                ewrScheduler.printSchedule(savePath);
             } catch(IOException e) {
                 displayError(this, "An unknown error occurred while creating the file.");
             }
             // Show confirmation
             JOptionPane.showMessageDialog(
                     null,
-                    "File '" + filename + "' created",
+                    "File '" + savePath + "' created",
                     "Complete",
                     JOptionPane.INFORMATION_MESSAGE
             );
@@ -829,10 +832,8 @@ public class Interface extends JFrame implements ActionListener, MouseListener {
         // After the schedule is displayed, schedule creation is disabled and
         // schedule printing is enabled.
         generateButton.setEnabled(false);
-        printButton.setEnabled(true);
-        filenameField.setEnabled(true);
-        filenameField.setText("ewrSchedule_" + LocalDate.now() + ".txt");
-        generateInstructions.setText("Change filename if desired, then press print");
+        saveButton.setEnabled(true);
+        generateInstructions.setText("Success! Save when ready");
         this.revalidate();
         this.repaint();
     }
