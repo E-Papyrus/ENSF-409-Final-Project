@@ -22,6 +22,6 @@ a situation where the application can create the schedule, but a backup voluntee
 is required, and 'impossible.sql' demonstrates a situation where there are too
 many tasks to schedule, even with a backup volunteer.
 
-[Video Demonstration](https://youtube.com)
+[Video Demonstration](https://youtu.be/x5Js2VufjVg)
 
 Project created by: [Ethan Reed](https://github.com/E-Papyrus) & [Mariyah Malik](https://github.com/mariyahmalik)
